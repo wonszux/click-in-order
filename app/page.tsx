@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import useSound from "use-sound";
 
 export default function Home() {
   const [round, setRound] = useState(1);
@@ -45,6 +46,7 @@ export default function Home() {
     const squares = ["green", "blue", "yellow", "red"];
 
     const handleClick = (index: number) => {
+      playSound(index);
       setAnswer((prevAns) => [...prevAns, index]);
       console.log(round);
       console.log(sequence);
@@ -52,6 +54,8 @@ export default function Home() {
 
     const squareItem = squares.map((color, index) => (
       <div
+        onMouseEnter={() => setBlinkIndex(index)}
+        onMouseLeave={() => setBlinkIndex(null)}
         onClick={() => handleClick(index)}
         key={index}
         className={`w-50 h-50 rounded-lg ${getColorClass(color, index)}`}
@@ -61,10 +65,16 @@ export default function Home() {
     return squareItem;
   };
 
+  const playSound = (index: number) => {
+    const audio = new Audio(`/sounds/${index}.wav`);
+    audio.play();
+  };
+
   const Blinking = () => {
     sequence.forEach((colorIndex, i) => {
       setTimeout(() => {
         setBlinkIndex(colorIndex);
+        playSound(colorIndex);
       }, i * 800);
 
       setTimeout(() => {
