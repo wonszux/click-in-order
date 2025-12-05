@@ -5,55 +5,54 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [round, setRound] = useState(1);
   const [gameStarted, setGameStarted] = useState(false);
-  const [sequence, setSequence] = useState([0]);
+  const [sequence, setSequence] = useState<number[]>([]);
   const [answer, setAnswer] = useState<number[]>([]);
   const [blinkIndex, setBlinkIndex] = useState<number | null>(null);
+  const [shouldBlink, setShouldBlink] = useState(false);
 
   const getColorClass = (color: string, index: number) => {
     if (index === blinkIndex) {
       switch (color) {
         case "green":
-          return "bg-green-700";
+          return "bg-green-200";
         case "blue":
-          return "bg-blue-700";
+          return "bg-blue-200";
         case "yellow":
-          return "bg-yellow-700";
+          return "bg-yellow-200";
         case "red":
-          return "bg-red-700";
+          return "bg-red-200";
       }
     } else {
       switch (color) {
         case "green":
-          return "bg-green-300";
+          return "bg-green-400";
         case "blue":
-          return "bg-blue-300";
+          return "bg-blue-400";
         case "yellow":
-          return "bg-yellow-300";
+          return "bg-yellow-400";
         case "red":
-          return "bg-red-300";
+          return "bg-red-500";
       }
     }
   };
 
   const Generate = () => {
-    const newRandom = Math.floor(Math.random() * 4);
-    setSequence((prevRand) => [...prevRand, newRandom]);
+    const newRand = Math.floor(Math.random() * 4);
+    setSequence((prevRand) => [...prevRand, newRand]);
   };
 
   const SquaresComponent = () => {
     const squares = ["green", "blue", "yellow", "red"];
 
-    const handleClick = (round: number, sequence: number[], index: number) => {
-      console.log(index);
+    const handleClick = (index: number) => {
       setAnswer((prevAns) => [...prevAns, index]);
-      GetAnswer(round, sequence);
       console.log(round);
       console.log(sequence);
     };
 
     const squareItem = squares.map((color, index) => (
       <div
-        onClick={() => handleClick(round, sequence, index)}
+        onClick={() => handleClick(index)}
         key={index}
         className={`w-50 h-50 rounded-lg ${getColorClass(color, index)}`}
       ></div>
@@ -66,34 +65,26 @@ export default function Home() {
     sequence.forEach((colorIndex, i) => {
       setTimeout(() => {
         setBlinkIndex(colorIndex);
-        setTimeout(() => setBlinkIndex(null), 500);
       }, i * 800);
+
+      setTimeout(() => {
+        setBlinkIndex(null);
+      }, i * 800 + 500);
     });
   };
 
-  const GameRestart = (round: number, sequence: number[]) => {
+  const GameRestart = () => {
     setRound(1);
-    setSequence([0]);
-  };
-
-  const GetAnswer = (round: number, sequence: number[]) => {
-    if (answer.length === round) {
-      if (answer === sequence) {
-        setAnswer([]);
-        setRound(round + 1);
-        Generate();
-        alert("you won this round");
-      } else {
-        GameRestart(round, sequence);
-        alert("you lost, restarting");
-      }
-    }
+    setSequence([]);
+    setGameStarted(false);
+    setAnswer([]);
+    setShouldBlink(false);
   };
 
   const StartGame = () => {
-    Blinking();
-    GetAnswer(round, sequence);
+    Generate();
     setGameStarted(true);
+    setShouldBlink(true);
   };
 
   const StartButton = () => {
@@ -112,6 +103,36 @@ export default function Home() {
       </div>
     );
   };
+
+  useEffect(() => {
+    if (answer.length === round && answer.length > 0) {
+      const currentSequence = sequence.slice(0, round);
+      const isCorrect =
+        JSON.stringify(answer) === JSON.stringify(currentSequence);
+
+      if (isCorrect) {
+        setTimeout(() => {
+          alert("You won this round!");
+          setAnswer([]);
+          setRound((prev) => prev + 1);
+          Generate();
+          setShouldBlink(true);
+        }, 300);
+      } else {
+        setTimeout(() => {
+          alert("You lost, restarting");
+          GameRestart();
+        }, 300);
+      }
+    }
+  }, [answer, round, sequence]);
+
+  useEffect(() => {
+    if (shouldBlink && sequence.length > 0) {
+      Blinking();
+      setShouldBlink(false);
+    }
+  }, [sequence, shouldBlink]);
 
   return (
     <div className="grid grid-cols-1 min-h-screen">
