@@ -2,35 +2,82 @@
 
 import { useEffect, useState } from "react";
 
+const GREEN = "green-300";
+const BLUE = "blue-300";
+const YELLOW = "yellow-300";
+const RED = "red-300";
+const BLINK = "shadow-";
+
 export default function Home() {
   const [round, setRound] = useState(1);
   const [gameOver, setGameOver] = useState<true | false>(false);
-  const [correct, setCorrect] = useState(0);
-  const [sequence, setSequence] = useState([]);
+  const [sequence, setSequence] = useState([0, 1, 2, 3, 0, 1, 2, 3]);
+  const [squareBlink, setSquareblink] = useState("");
 
-  function Generate() {
-    const randomSquare = Math.floor(Math.random() * (5 - 1) + 1);
-    setCorrect(randomSquare);
-  }
+  const Generate = () => {
+    const newRandom = Math.floor(Math.random() * 4);
+    setSequence((prev) => [...prev, newRandom]);
+  };
 
-  function ClickHandler(key: any) {
-    console.log(key);
-  }
+  const SquaresComponent = () => {
+    const squares = [GREEN, BLUE, YELLOW, RED];
+
+    const handleClick = (square: string) => {
+      console.log(square);
+      Generate();
+      console.log(sequence);
+    };
+
+    const squareItem = squares.map((square, index) => (
+      <div
+        onClick={() => handleClick(square)}
+        key={index}
+        className={"w-50 h-50 rounded-lg bg-" + square}
+      ></div>
+    ));
+
+    return squareItem;
+  };
+
+  // async function blinking(square: any) {
+  //   const blink = BLINK + square;
+  //   for (let i = 0; i < sequence.length; i++) {
+  //     useEffect(() => {
+  //       setSquareblink(blink);
+  //     });
+  //     setTimeout(() => {
+  //       useEffect(() => {
+  //         setSquareblink("");
+  //       });
+  //     }, 1000);
+  //   }
+  // }
+
+  // const StartGame = () => {
+  //   blinking;
+  // };
+
+  const StartButton = () => {
+    return (
+      <div className="flex flex-row justify-center items-center">
+        <button
+          // onClick={StartGame}
+          className=" bg-purple-300 font-black text-black w-50 h-10 rounded-4xl"
+        >
+          Start the Game
+        </button>
+      </div>
+    );
+  };
 
   return (
-    <div className="flex flex-col min-h-screen justify-center items-center space-y-3">
-      <div className="flex flex-row space-x-3">
-        <div
-          key={1}
-          onClick={ClickHandler}
-          className="bg-green-300 w-50 h-50 rounded-xl"
-        ></div>
-        <div key={2} className="bg-blue-300 w-50 h-50 rounded-lg"></div>
+    <div className="grid grid-cols-1 min-h-screen">
+      <div className="flex flex-row justify-center items-center">
+        <div className="grid grid-cols-2 space-x-3 space-y-3">
+          {SquaresComponent()}
+        </div>
       </div>
-      <div className="flex flex-row space-x-3">
-        <div key={3} className="bg-yellow-300 w-50 h-50 rounded-lg"></div>
-        <div key={4} className="bg-red-300 w-50 h-50 rounded-lg"></div>
-      </div>
+      {StartButton()}
     </div>
   );
 }
